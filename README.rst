@@ -1,4 +1,4 @@
 ci-stack
 ========
 
-Wrapper scripts around devstack to create a CI environment
+Installation scripts to create a CI environment
