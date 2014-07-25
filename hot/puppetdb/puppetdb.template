@@ -7,6 +7,11 @@ parameters:
   key_name:
     type: string
     description: Name of an existing key pair to use
+    default: admin
+  admin_user:
+    type: string
+    description: The admin username
+    default: ubuntu
   flavor:
     type: string
     description: m1.little is a custom type for CI on devstack
@@ -23,6 +28,7 @@ resources:
       key_name: { get_param: key_name }
       image: { get_param: image }
       flavor: { get_param: flavor }
+      admin_user: { get_param: admin_user }
 
 outputs:
   instance_ip:

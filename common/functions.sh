@@ -20,7 +20,7 @@ function run_bootstrap {
 		./bootstrap/${MODULE}/bootstrap.sh
 	else
 		tar jcvf bootstrap.tar.bz2 common bootstrap/$1
-		ssh-keygen -f ~/.ssh/known_hosts -R 10.11.12.2
+		ssh-keygen -f ~/.ssh/known_hosts -R {IP}
 		scp -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key bootstrap.tar.bz2 ${USER}@${IP}:
 		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} "rm -rf common bootstrap && tar jxvf bootstrap.tar.bz2"
 		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} ./bootstrap/${MODULE}/bootstrap.sh
