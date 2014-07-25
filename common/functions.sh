@@ -20,6 +20,7 @@ function run_bootstrap {
 		./bootstrap/${MODULE}/bootstrap.sh
 	else
 		tar jcvf bootstrap.tar.bz2 common bootstrap/$1
+		ssh-keygen -f ~/.ssh/known_hosts -R 10.11.12.2
 		scp -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key bootstrap.tar.bz2 ${USER}@${IP}:
 		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} "rm -rf common bootstrap && tar jxvf bootstrap.tar.bz2"
 		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} ./bootstrap/${MODULE}/bootstrap.sh
@@ -42,7 +43,7 @@ function provision_node {
 	if [ "${MODULE}" = "devstack" ]; then return; fi
 	local KEY_NAME=$2
 	local USER=$3
-	heat stack-create ${MODULE} --template-file hot/{$MODULE}/${MODULE}.template
+	heat stack-create ${MODULE} --template-file hot/${MODULE}/${MODULE}.template --parameters key_name=${KEY_NAME}
 	local IP=""
 	while [ -z "${IP}" ]; do
     	IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
