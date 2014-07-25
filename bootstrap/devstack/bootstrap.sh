@@ -6,6 +6,6 @@ sudo apt-get install git
 rm -rf devstack
 git clone https://github.com/openstack-dev/devstack.git
 cp ${DIR}/devstack-local.conf devstack/local.conf
-cp ${DIR}devstack-local.sh devstack/local.sh
+cp ${DIR}/devstack-local.sh devstack/local.sh
 cd devstack
 ./stack.sh
