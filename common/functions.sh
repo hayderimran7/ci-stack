@@ -10,7 +10,7 @@ function wait_for_ssh {
 
 function run_bootstrap {
 	local MODULE=$1
-	local IP=`heat output-show ${MODULE} instance_ip|sed -e '/"//g'`
+	local IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
 	local KEY_NAME=${2:-"admin"}
 	local USER=${3:-"ubuntu"}
 	# I'm sure this can be done without hard coding module names.
@@ -45,7 +45,7 @@ function provision_node {
 	heat stack-create ${MODULE} --template-file hot/{$MODULE}/${MODULE}.template
 	local IP=""
 	while [ -z "${IP}" ]; do
-    	IP=`heat output-show ${MODULE} instance_ip|sed -e '/"//g'`
+    	IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
 	done
 	wait_for_ssh ${IP} ${KEY_NAME} ${USER}
 }
