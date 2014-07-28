@@ -20,7 +20,7 @@ CI_STACK_BRANCH=${CI_STACK_BRANCH:-"master"}
 provision_node ${MODULE} ${KEY_NAME} ${USER}
 run_bootstrap ${MODULE} ${KEY_NAME} ${USER}
 
-for HOOK_SCRIPT in `ls bootstrap/*/post_${MODULE}.sh`
+for HOOK_SCRIPT in `find bootstrap -name post_${MODULE}.sh`
 do
 	# If a module has a script that needs to be run after this
 	# module, run it now. This is mostly because puppetdb

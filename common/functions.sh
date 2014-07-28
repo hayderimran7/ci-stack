@@ -10,7 +10,6 @@ function wait_for_ssh {
 
 function run_bootstrap {
 	local MODULE=$1
-	local IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
 	local KEY_NAME=${2:-"admin"}
 	local USER=${3:-"ubuntu"}
 	# I'm sure this can be done without hard coding module names.
@@ -19,6 +18,7 @@ function run_bootstrap {
 	then
 		./bootstrap/${MODULE}/bootstrap.sh
 	else
+		local IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
 		tar jcvf bootstrap.tar.bz2 common bootstrap/$1
 		ssh-keygen -f ~/.ssh/known_hosts -R {IP}
 		scp -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key bootstrap.tar.bz2 ${USER}@${IP}:
@@ -49,4 +49,13 @@ function provision_node {
     	IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
 	done
 	wait_for_ssh ${IP} ${KEY_NAME} ${USER}
+}
+
+function add_hosts_entry {
+	local HOSTNAME=$1
+	local IP=$2
+	grep -v "${HOSTNAME}$" /etc/hosts > /tmp/ci-stack_hosts
+	echo "${IP} ${HOSTNAME}" >> /tmp/ci-stack_hosts
+	sudo cp /tmp/ci-stack_hosts /etc/hosts
+	rm /tmp/ci-stack_hosts
 }
