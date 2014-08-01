@@ -8,6 +8,17 @@ function wait_for_ssh {
 	fi
 }
 
+function upload_bootstrap {
+	local MODULE=$1
+	local KEY_NAME=${2:-"admin"}
+	local USER=${3:-"ubuntu"}
+	local IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
+	tar jcvf bootstrap.tar.bz2 common bootstrap/$1
+	ssh-keygen -f ~/.ssh/known_hosts -R {IP}
+	scp -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key bootstrap.tar.bz2 ${USER}@${IP}:
+	ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} "rm -rf common bootstrap && tar jxvf bootstrap.tar.bz2"
+}
+
 function run_bootstrap {
 	local MODULE=$1
 	local KEY_NAME=${2:-"admin"}
@@ -19,10 +30,6 @@ function run_bootstrap {
 		./bootstrap/${MODULE}/bootstrap.sh
 	else
 		local IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
-		tar jcvf bootstrap.tar.bz2 common bootstrap/$1
-		ssh-keygen -f ~/.ssh/known_hosts -R {IP}
-		scp -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key bootstrap.tar.bz2 ${USER}@${IP}:
-		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} "rm -rf common bootstrap && tar jxvf bootstrap.tar.bz2"
 		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} ./bootstrap/${MODULE}/bootstrap.sh
 	fi
 }
@@ -52,10 +59,11 @@ function provision_node {
 }
 
 function add_hosts_entry {
-	local HOSTNAME=$1
-	local IP=$2
-	grep -v "${HOSTNAME}$" /etc/hosts > /tmp/ci-stack_hosts
-	echo "${IP} ${HOSTNAME}" >> /tmp/ci-stack_hosts
+	local MODULE=$1
+	local DOMAIN=2
+	local IP=$3
+	grep -v "${MODULE}$" /etc/hosts > /tmp/ci-stack_hosts
+	echo "${IP} ${MODULE}.${DOMAIN} ${MODULE}" >> /tmp/ci-stack_hosts
 	sudo cp /tmp/ci-stack_hosts /etc/hosts
 	rm /tmp/ci-stack_hosts
 }

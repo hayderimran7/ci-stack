@@ -1,0 +1,36 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Brings up an instance for the puppetmaster to run on
+
+parameters:
+  key_name:
+    type: string
+    description: Name of an existing key pair to use
+    default: admin
+  admin_user:
+    type: string
+    description: The admin username
+    default: ubuntu
+  flavor:
+    type: string
+    default: m1.small
+  image:
+    type: string
+    description: Name or ID of the image to use
+    default: precise-server-cloudimg-amd64
+
+resources:
+  puppetmaster_instance:
+    type: OS::Nova::Server
+    properties:
+      key_name: { get_param: key_name }
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      admin_user: { get_param: admin_user }
+      name: puppetmaster
+
+outputs:
+  instance_ip:
+    description: The IP address of the deployed instance
+    value: { get_attr: [puppetmaster_instance, networks, private, 0] }

@@ -29,6 +29,7 @@ resources:
       image: { get_param: image }
       flavor: { get_param: flavor }
       admin_user: { get_param: admin_user }
+      name: puppetdb
 
 outputs:
   instance_ip:
