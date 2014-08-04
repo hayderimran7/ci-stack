@@ -14,8 +14,6 @@ KEY_NAME=${2:-"admin"}
 USER=${3:-"ubuntu"}
 DOMAIN=${4:-"novalocal"}
 
-DEPLOYED=${DEPLOYED:-""}
-
 if [ "${MODULE}" = "" ]
 then
 	echo "deploy.sh [module] [key_name] [user] [domain]"
@@ -38,13 +36,13 @@ if [ "${MODULE}" != "devstack" ]
 then
 	upload_bootstrap ${MODULE} ${KEY_NAME} ${USER}
 
-	DEPLOYED="${DEPLOYED} ${MODULE}"
-	MODULE_IP=`heat output-show ${MODULE} instance_ip|sed -e 's/"//g'`
+	DEPLOYED="$(heat stack-list|awk '{print $4}'|grep -e '^ci_'|sed -e 's/^ci_//')"
+	MODULE_IP=`heat output-show ci_${MODULE} instance_ip|sed -e 's/"//g'`
 
 	# update all the nodes with the new node's ip
 	for node in ${DEPLOYED}
 	do
-		TARGET_IP=`heat output-show ${node} instance_ip|sed -e 's/"//g'`
+		TARGET_IP=`heat output-show ci_${node} instance_ip|sed -e 's/"//g'`
 		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${TARGET_IP} "source common/functions.sh && add_hosts_entry ${MODULE} ${DOMAIN} ${MODULE_IP}"
 	done
 
@@ -58,7 +56,6 @@ then
 		run_post ${HOOK_SCRIPT} ${KEY_NAME} ${USER}
 	done
 
-	export DEPLOYED
 fi
 
 run_bootstrap ${MODULE} ${KEY_NAME} ${USER}
