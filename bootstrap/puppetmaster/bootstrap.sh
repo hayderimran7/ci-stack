@@ -10,7 +10,13 @@ sudo /opt/config/production/install_modules.sh
 
 # fix up the domain names in site.pp
 DOMAIN=`hostname -d`
-sudo sed -i /opt/config/production/manifests/site.pp -e 's/\.openstack\.org/${DOMAIN}/gm'
+for f in `find /opt/config/production/modules /opt/config/production/manifests -type f`
+do
+	sudo sed -i $f -e "s/\\.openstack\\.org/.${DOMAIN}/gm"
+done
+
+# openstack requires ci-puppetmaster for the ca server, add it as a hostname here
+sudo echo "127.0.2.1 ci-puppetmaster.${DOMAIN} ci-puppetmaster" | sudo tee -a /etc/hosts
 
 # apply the puppet agent
-sudo puppet apply --modulepath='/opt/config/production/modules:/etc/puppet/modules' -e 'include openstack_project::puppetmaster'
+sudo puppet agent --test --modulepath='/opt/config/production/modules:/etc/puppet/modules' 

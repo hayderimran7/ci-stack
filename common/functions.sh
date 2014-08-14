@@ -38,7 +38,7 @@ function run_post {
 	local POST_SCRIPT=$1
 	# do not attempt to read this line when drunk
 	local MODULE=`echo ${POST_SCRIPT}|sed -e 's/bootstrap\/\([^/]\+\)\/.\+sh/\1/'`
-	local IP=`heat output-show ci_${MODULE} instance_ip|sed -e '/"//g'`
+	local IP=`heat output-show ci_${MODULE} instance_ip|sed -e 's/"//g'`
 	local KEY_NAME=${2:-"admin"}
 	local USER=${3:-"ubuntu"}
 	ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${IP} ./${POST_SCRIPT}
