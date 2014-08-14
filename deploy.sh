@@ -47,15 +47,16 @@ then
 	done
 
 
-	for HOOK_SCRIPT in `find bootstrap -name post_${MODULE}.sh`
-	do
-		# If a module has a script that needs to be run after this
-		# module, run it now. This is mostly because puppetdb
-		# needs to be set up before the puppetmaster, and afterwards
-		# it needs to get config from the puppetmaster.
-		run_post ${HOOK_SCRIPT} ${KEY_NAME} ${USER}
-	done
 
 fi
 
 run_bootstrap ${MODULE} ${KEY_NAME} ${USER}
+
+for HOOK_SCRIPT in `find bootstrap -name post_${MODULE}.sh`
+do
+	# If a module has a script that needs to be run after this
+	# module, run it now. This is mostly because puppetdb
+	# needs to be set up before the puppetmaster, and afterwards
+	# it needs to get config from the puppetmaster.
+	run_post ${HOOK_SCRIPT} ${KEY_NAME} ${USER}
+done
