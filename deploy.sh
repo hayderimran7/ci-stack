@@ -37,17 +37,17 @@ then
 	upload_bootstrap ${MODULE} ${KEY_NAME} ${USER}
 
 	DEPLOYED="$(heat stack-list|awk '{print $4}'|grep -e '^ci_'|sed -e 's/^ci_//')"
-	MODULE_IP=`heat output-show ci_${MODULE} instance_ip|sed -e 's/"//g'`
 
-	# update all the nodes with the new node's ip
-	for node in ${DEPLOYED}
+	# update all the nodes with the update host entries
+	for DEPLOYED_MODULE in ${DEPLOYED}
 	do
-		TARGET_IP=`heat output-show ci_${node} instance_ip|sed -e 's/"//g'`
-		ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${TARGET_IP} "source common/functions.sh && add_hosts_entry ${MODULE} ${DOMAIN} ${MODULE_IP}"
+		DEPLOYED_MODULE_IP=`heat output-show ci_${DEPLOYED_MODULE} instance_ip|sed -e 's/"//g'`
+		for UPDATE_NODE in ${DEPLOYED}
+		do
+			TARGET_IP=`heat output-show ci_${UPDATE_NODE} instance_ip|sed -e 's/"//g'`
+			ssh -o StrictHostKeyChecking=no -i keys/${KEY_NAME}_key ${USER}@${TARGET_IP} "source common/functions.sh && add_hosts_entry ${DEPLOYED_MODULE} ${DOMAIN} ${DEPLOYED_MODULE_IP}"
+		done
 	done
-
-
-
 fi
 
 run_bootstrap ${MODULE} ${KEY_NAME} ${USER}
