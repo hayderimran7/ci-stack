@@ -52,7 +52,7 @@ function provision_node {
 	local USER=$3
 	heat stack-create ci_${MODULE} --template-file hot/${MODULE}/${MODULE}.template --parameters key_name=${KEY_NAME}
 	local IP=""
-	while [ -z "${IP}" ]; do
+	while [[ -z "${IP}" && "${IP}" != "null" ]]; do
     	IP=`heat output-show ci_${MODULE} instance_ip|sed -e 's/"//g'`
 	done
 	wait_for_ssh ${IP} ${KEY_NAME} ${USER}
